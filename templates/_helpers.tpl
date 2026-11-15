@@ -103,11 +103,3 @@ Postgresql Environment for postgres
   value: {{ .Values.betydb.betyDatabase | quote }}
 {{- end -}}
 
-{{/*
-BETYDB Environment for postgresql
-*/}}
-{{- define "pecan.env.betydb" -}}
-- name: BETYDBURL
-  value: "http://{{ .Release.Name }}-betydb:{{ .Values.betydb.service.port | default "8000" }}{{ .Values.betydb.ingress.path | default "/" }}"
-{{- end -}}
-

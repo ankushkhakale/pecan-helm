@@ -172,36 +172,6 @@ docs:
   tolerations: []
 
 ## -------------------------------------------------------------------------------
-## PECAN WEB APP
-## -------------------------------------------------------------------------------
-
-web:
-  ## replicaCount is the number of instances that should be running.
-  replicaCount: 1
-
-  ## service options
-  service:
-    ## ServiceType
-    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-    type: ClusterIP
-
-    ## port the service is listening on
-    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#defining-a-service
-    port: 8888
-
-  ## Resources
-  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container
-  resources: {}
-
-  ## Support Node, affinity and tolerations for flower pod assignment
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#taints-and-tolerations-beta-feature
-  nodeSelector: {}
-  affinity: {}
-  tolerations: []
-
-## -------------------------------------------------------------------------------
 ## PECAN EXECUTOR
 ## -------------------------------------------------------------------------------
 
@@ -309,11 +279,6 @@ persistence:
 
   ## Annotations
   annotations: {}
-
-# -------------------------------------------------------------------------------
-
-service:
-  type: ClusterIP
 
 # -------------------------------------------------------------------------------
 

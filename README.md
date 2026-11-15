@@ -33,6 +33,11 @@ $ helm install my-release ncsa/pecan
 
 The command deploys PEcAn on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation. This will also install BetyDB as well as some model runners.
 
+The deprecated `pecan-web` application is not deployed. Documentation, BETY,
+the executor, model monitor, model runners, and optional RStudio remain. The
+Helm test hook (`helm test my-release`) checks HTTP access to the documentation
+Service. Former `web.*` and top-level `service.*` values have no consumers.
+
 > **Tip**: List all releases using `helm list`
 
 ## Uninstalling the Chart
