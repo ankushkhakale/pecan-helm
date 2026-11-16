@@ -29,7 +29,9 @@ This chart bootstraps a [PEcAn](https://pecanproject.github.io/) deployment on a
 - Helm 3.8+ (the RabbitMQ and PostgreSQL dependencies are fetched from an OCI registry)
 - PV provisioner support in the underlying infrastructure
 
-The chart has been installed and started only on Kubernetes 1.37. Rendering
+These image changes were exercised with the separate pecan-web removal in a
+disposable Kubernetes 1.37 cluster. That did not validate a successful default
+BETY install: the bundled demo database archive has integrity errors. Rendering
 with `helm template --kube-version` for older versions is not a runtime test.
 
 ## Installing the Chart
