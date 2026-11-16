@@ -7,10 +7,14 @@ Climate change science has witnessed an explosion in the amount and types of dat
 ## TL;DR;
 
 ```bash
+$ git clone https://github.com/PecanProject/pecan-helm.git && cd pecan-helm
 $ helm repo add ncsa https://opensource.ncsa.illinois.edu/charts/
-$ helm dependency build
-$ helm install pecan ncsa/pecan
+$ helm dependency build .
+$ helm install pecan .
 ```
+
+These commands install from this source checkout. The published `ncsa/pecan`
+package does not contain the RabbitMQ and PostgreSQL changes described below.
 
 ## Introduction
 
@@ -18,16 +22,18 @@ This chart bootstraps a [PEcAn](https://pecanproject.github.io/) deployment on a
 
 ## Prerequisites
 
-- Kubernetes 1.16+
+- Kubernetes 1.23+ (uses `networking.k8s.io/v1` Ingress, Job
+  `ttlSecondsAfterFinished` and pod `fsGroupChangePolicy`)
 - Helm 3.8+ (the RabbitMQ and PostgreSQL dependencies are fetched from an OCI registry)
 - PV provisioner support in the underlying infrastructure
 
 ## Installing the Chart
 
-To install the chart with the release name `my-release`:
+From the source checkout, after `helm dependency build .`, install the chart with
+the release name `my-release`:
 
 ```bash
-$ helm install my-release ncsa/pecan
+$ helm install my-release .
 ```
 
 The command deploys PEcAn on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation. This will also install BetyDB as well as some model runners.
@@ -63,7 +69,7 @@ The following table lists the configurable parameters of the PEcAn chart and the
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
 ```bash
-$ helm install my-release ncsa/pecan --set clustername=ncsa
+$ helm install my-release . --set clustername=ncsa
 ```
 
 The above command sets the cluster name to `ncsa`.
@@ -71,7 +77,7 @@ The above command sets the cluster name to `ncsa`.
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
 ```bash
-$ helm install my-release ncsa/pecan --values values.yaml
+$ helm install my-release . --values values.yaml
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)
@@ -98,6 +104,38 @@ longer published. This chart uses maintained, non-Bitnami replacements:
   `guest` user from localhost, so PEcAn uses `rabbitmq.auth.username` (default
   `pecan`) with a generated password from Secret `<release>-rabbitmq`, key
   `password`. Settings moved from `rabbitmq.rabbitmq.*` to `rabbitmq.auth.*`.
+
+#### Keeping credentials stable
+
+The generated RabbitMQ password and Erlang cookie and the generated PostgreSQL
+password are reused only when Helm can read the live Secrets, as `helm install`
+and `helm upgrade` against the cluster do. Offline rendering (`helm template`,
+or GitOps tools that render without cluster access) generates new values on
+every render. Applying such output would change the Secrets while the database
+and broker keep their original credentials.
+
+To get the same credentials on every render, supply them at render time from a
+values file kept outside Git (for example, written by your secret manager):
+
+```yaml
+# /secure/pecan-credentials.yaml (do not commit)
+postgresql:
+  auth:
+    password: "<postgres admin password>"
+rabbitmq:
+  auth:
+    password: "<rabbitmq password>"
+    erlangCookie: "<erlang cookie>"
+```
+
+```bash
+$ helm template my-release . --values /secure/pecan-credentials.yaml
+```
+
+Alternatively, create a RabbitMQ Secret yourself and set
+`rabbitmq.auth.existingSecret` (keys `password` and `erlang-cookie`). Use the
+same values for every later render and upgrade. Changing them does not change
+the credentials already stored in PostgreSQL or RabbitMQ.
 
 **This is not an in-place upgrade from 0.6.x data.** PostgreSQL 11 and RabbitMQ
 3.8 volumes cannot be attached to the new StatefulSets; use fresh volumes or a
@@ -127,7 +165,7 @@ PEcAn uses disk storage to store the results of the workflow execution as well a
 1. Install the chart
 
 ```bash
-$ helm install my-release ncsa/pecan --set persistence.existingClaim=PVC_NAME
+$ helm install my-release . --set persistence.existingClaim=PVC_NAME
 ```
 
 ## Testing Locally
