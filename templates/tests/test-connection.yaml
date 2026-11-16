@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args:  ['{{ include "pecan.fullname" . }}:{{ .Values.service.port }}']
+      args:  ['-q', '-O', '-', 'http://{{ include "pecan.fullname" . }}-docs:{{ .Values.docs.service.port }}/']
   restartPolicy: Never
