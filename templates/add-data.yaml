@@ -6,7 +6,9 @@ metadata:
   labels:
     {{- include "pecan.labels" . | nindent 4 }}
 spec:
-  ttlSecondsAfterFinished: 1
+  # Keep the Job so its result can be observed (helm --wait-for-jobs, kubectl).
+  # A failed load is a data problem; do not re-run a non-transactional loader.
+  backoffLimit: 0
   template:
     metadata:
       name: "{{.Release.Name}}"
@@ -33,6 +35,9 @@ spec:
         - name: add-data
           image: "{{ .Values.image.project }}/data:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # The image's own command ignores psql failures and exits 0.
+          # Run the same script with errexit so a failed statement fails the Job.
+          command: ["bash", "-e", "/work/add-data.sh"]
           volumeMounts:
             - name: data
               mountPath: /data
