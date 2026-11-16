@@ -6,15 +6,17 @@ Climate change science has witnessed an explosion in the amount and types of dat
 
 ## TL;DR;
 
+Run these commands from a checkout that contains these changes (upstream
+`main` does not contain them yet):
+
 ```bash
-$ git clone https://github.com/PecanProject/pecan-helm.git && cd pecan-helm
 $ helm repo add ncsa https://opensource.ncsa.illinois.edu/charts/
 $ helm dependency build .
 $ helm install pecan .
 ```
 
-These commands install from this source checkout. The published `ncsa/pecan`
-package does not contain the RabbitMQ and PostgreSQL changes described below.
+The published `ncsa/pecan` package does not contain the RabbitMQ and PostgreSQL
+changes described below.
 
 ## Introduction
 
@@ -22,10 +24,13 @@ This chart bootstraps a [PEcAn](https://pecanproject.github.io/) deployment on a
 
 ## Prerequisites
 
-- Kubernetes 1.23+ (uses `networking.k8s.io/v1` Ingress, Job
-  `ttlSecondsAfterFinished` and pod `fsGroupChangePolicy`)
+- Kubernetes 1.24+ (the minimum stated by the pinned CloudPirates RabbitMQ and
+  PostgreSQL charts)
 - Helm 3.8+ (the RabbitMQ and PostgreSQL dependencies are fetched from an OCI registry)
 - PV provisioner support in the underlying infrastructure
+
+The chart has been installed and started only on Kubernetes 1.37. Rendering
+with `helm template --kube-version` for older versions is not a runtime test.
 
 ## Installing the Chart
 
