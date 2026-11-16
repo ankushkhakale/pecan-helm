@@ -20,15 +20,17 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       initContainers:
-        - name: check-postgresql
-          image: "{{ $.Values.image.checks }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        # Wait for BETY's validated readiness record (the same initializer image
+        # and `wait` protocol as the BETY Deployment gate), not for a table to
+        # exist: the restore creates tables before validation finishes.
+        - name: wait-database-ready
+          image: {{ required "betydb.bootstrap.image is required: an initializer image implementing bootstrap/check/wait" $.Values.betydb.bootstrap.image | quote }}
+          imagePullPolicy: {{ $.Values.betydb.bootstrap.pullPolicy }}
+          args: ["wait"]
           env:
             {{- include "pecan.env.postgresql" . | nindent 12 }}
-            - name: PGDATABASE
-              value: {{ .Values.betydb.betyDatabase | quote }}
-            - name: PG_TABLE
-              value: "yields"
+            - name: BOOTSTRAP_TIMEOUT
+              value: {{ $.Values.betydb.bootstrap.timeoutSeconds | quote }}
       containers:
         - name: add-data
           image: "{{ .Values.image.project }}/data:{{ .Values.image.tag | default .Chart.AppVersion }}"

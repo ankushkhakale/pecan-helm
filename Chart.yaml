@@ -43,7 +43,7 @@ dependencies:
   repository: oci://registry-1.docker.io/cloudpirates
   condition: postgresql.enabled
 - name: betydb
-  version: 0.5.4
+  version: 0.7.0
   repository: https://opensource.ncsa.illinois.edu/charts/
   condition: betydb.enabled
 

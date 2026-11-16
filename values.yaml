@@ -78,16 +78,22 @@ models:
 ## -------------------------------------------------------------------------------
 
 betydb:
-  # BETY 0.5.4 gates its bundled Bitnami PostgreSQL chart with postgres.enabled,
-  # but its templates use postgresql.enabled to connect to <release>-postgresql
-  # with Secret key postgresql-password. Disable the bundled server and keep the
-  # connection mode; the top-level postgresql dependency provides the server.
-  postgres:
-    enabled: false
+  # BETY connects to the top-level postgresql server (<release>-postgresql)
+  # using the admin password from Secret <release>-postgresql.
   postgresql:
     enabled: true
     service:
       port: 5432
+    auth:
+      secretKeys:
+        adminPasswordKey: postgresql-password
+  # Initializer image (bootstrap/check/wait) containing the BETY archive to
+  # load. Required; there is no default. Pin it by digest. The parent's
+  # load-data Job uses the same image and settings to wait for BETY.
+  bootstrap:
+    image: ""
+    pullPolicy: IfNotPresent
+    timeoutSeconds: 600
 
   ingress:
     ## should ingress rules be enabled (betydb is set below, monitor is set below)

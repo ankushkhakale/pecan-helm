@@ -107,9 +107,13 @@ longer published. This chart uses maintained, non-Bitnami replacements:
   `postgresql.auth.password` generates a password on install; upgrades reuse the
   existing Secret. A differing explicit password, or a missing Secret on upgrade,
   fails rendering rather than breaking authentication.
-- `betydb.postgres.enabled: false` turns off BETY 0.5.4's bundled Bitnami
-  PostgreSQL; `betydb.postgresql.enabled: true` keeps BETY connected to the
-  server above. Keep both.
+- BETY loads its database with a bootstrap Job and starts only after that load
+  has been validated. Set `betydb.bootstrap.image` to an initializer image that
+  contains the archive to load, and install or upgrade with
+  `--wait --wait-for-jobs`. No validated BETY archive exists yet: the current
+  demo dump (`pecan/db:latest`) is rejected because of orphan rows, so this
+  chart cannot be released for a working default install until one exists.
+  The demo-data Job (`initializeData`) waits for the same validated record.
 - RabbitMQ is `<release>-rabbitmq:5672`, vhost `/`. RabbitMQ 4 only accepts the
   `guest` user from localhost, so PEcAn uses `rabbitmq.auth.username` (default
   `pecan`) with a generated password from Secret `<release>-rabbitmq`, key
