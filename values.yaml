@@ -78,6 +78,17 @@ models:
 ## -------------------------------------------------------------------------------
 
 betydb:
+  # BETY 0.5.4 gates its bundled Bitnami PostgreSQL chart with postgres.enabled,
+  # but its templates use postgresql.enabled to connect to <release>-postgresql
+  # with Secret key postgresql-password. Disable the bundled server and keep the
+  # connection mode; the top-level postgresql dependency provides the server.
+  postgres:
+    enabled: false
+  postgresql:
+    enabled: true
+    service:
+      port: 5432
+
   ingress:
     ## should ingress rules be enabled (betydb is set below, monitor is set below)
     ## best set to the same value as PEcAn.
@@ -96,15 +107,42 @@ betydb:
 ## -------------------------------------------------------------------------------
 
 rabbitmq:
-  rabbitmq:
-    username: guest
-    password: guest
-    erlangCookie: 1234thisisasupersecretoflength32
-
+  enabled: true
+  auth:
+    # RabbitMQ 4 only allows the default "guest" user from localhost.
+    username: pecan
+    # Empty generates a password; the dependency reuses it on upgrades.
+    password: ""
+    erlangCookie: ""
+  service:
+    amqpPort: 5672
   ingress:
     enabled: false
-    hostName: rabbitmq.localhost
+    hostname: rabbitmq.localhost
     path: /
+
+## -------------------------------------------------------------------------------
+## POSTGRESQL (WITH POSTGIS FOR BETY)
+## -------------------------------------------------------------------------------
+
+postgresql:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: postgis/postgis
+    tag: "16-3.7@sha256:2efb99361d4d3d9678688d1937b5d15e19343dad1ccb0c7ec6d49eeb6507a86b"
+  auth:
+    # Keep the administrative interface expected by BETY and PEcAn.
+    username: postgres
+    # Empty generates a 32-character password on install and reuses the live
+    # Secret on upgrades. An explicit value sets the initial password only.
+    password: ""
+    existingSecret: '{{ .Release.Name }}-postgresql'
+    secretKeys:
+      adminPasswordKey: postgresql-password
+  persistence:
+    enabled: true
+    size: 20Gi
 
 ## -------------------------------------------------------------------------------
 ## INGRESS RULES

@@ -34,11 +34,16 @@ sources:
 # are enabled.
 dependencies:
 - name: rabbitmq
-  version: ~6
-  repository: https://raw.githubusercontent.com/bitnami/charts/pre-2022/bitnami
+  version: 0.21.32
+  repository: oci://registry-1.docker.io/cloudpirates
   condition: rabbitmq.enabled
+- name: postgres
+  alias: postgresql
+  version: 0.21.2
+  repository: oci://registry-1.docker.io/cloudpirates
+  condition: postgresql.enabled
 - name: betydb
-  version: ~0.5
+  version: 0.5.4
   repository: https://opensource.ncsa.illinois.edu/charts/
   condition: betydb.enabled
 

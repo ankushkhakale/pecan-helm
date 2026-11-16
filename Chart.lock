@@ -1,9 +1,12 @@
 dependencies:
 - name: rabbitmq
-  repository: https://raw.githubusercontent.com/bitnami/charts/pre-2022/bitnami
-  version: 6.28.1
+  repository: oci://registry-1.docker.io/cloudpirates
+  version: 0.21.32
+- name: postgres
+  repository: oci://registry-1.docker.io/cloudpirates
+  version: 0.21.2
 - name: betydb
   repository: https://opensource.ncsa.illinois.edu/charts/
   version: 0.5.4
-digest: sha256:b1faaa40ed16ba32c1fac38402f172c11dca1147d68c22ffeca8fd619c10741f
-generated: "2022-07-26T13:56:22.537572157-05:00"
+digest: sha256:4d7e8b636de4642bc2bf66aa8399c3db4b8ef5b9f5701ae02f42423360cdef76
+generated: "2026-11-16T07:28:19.718882503Z"

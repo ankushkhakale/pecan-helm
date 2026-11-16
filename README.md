@@ -8,7 +8,6 @@ Climate change science has witnessed an explosion in the amount and types of dat
 
 ```bash
 $ helm repo add ncsa https://opensource.ncsa.illinois.edu/charts/
-$ helm repo add bitnami https://raw.githubusercontent.com/bitnami/charts/pre-2022/bitnami
 $ helm dependency build
 $ helm install pecan ncsa/pecan
 ```
@@ -20,7 +19,7 @@ This chart bootstraps a [PEcAn](https://pecanproject.github.io/) deployment on a
 ## Prerequisites
 
 - Kubernetes 1.16+
-- helm 3
+- Helm 3.8+ (the RabbitMQ and PostgreSQL dependencies are fetched from an OCI registry)
 - PV provisioner support in the underlying infrastructure
 
 ## Installing the Chart
@@ -76,6 +75,33 @@ $ helm install my-release ncsa/pecan --values values.yaml
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)
+
+### RabbitMQ and PostgreSQL dependencies
+
+The Bitnami RabbitMQ and PostgreSQL images used by earlier releases are no
+longer published. This chart uses maintained, non-Bitnami replacements:
+
+| Dependency | Chart | Image |
+| --- | --- | --- |
+| RabbitMQ | CloudPirates `rabbitmq` 0.21.32 (`oci://registry-1.docker.io/cloudpirates`) | official `rabbitmq:4.4.0-management`, digest pinned by the chart |
+| PostgreSQL | CloudPirates `postgres` 0.21.2, aliased `postgresql` | `postgis/postgis:16-3.7`, digest pinned in `values.yaml` (BETY needs PostGIS) |
+
+- PEcAn and BETY still connect to `<release>-postgresql:5432` as `postgres`, using
+  Secret `<release>-postgresql`, key `postgresql-password`. An empty
+  `postgresql.auth.password` generates a password on install; upgrades reuse the
+  existing Secret. A differing explicit password, or a missing Secret on upgrade,
+  fails rendering rather than breaking authentication.
+- `betydb.postgres.enabled: false` turns off BETY 0.5.4's bundled Bitnami
+  PostgreSQL; `betydb.postgresql.enabled: true` keeps BETY connected to the
+  server above. Keep both.
+- RabbitMQ is `<release>-rabbitmq:5672`, vhost `/`. RabbitMQ 4 only accepts the
+  `guest` user from localhost, so PEcAn uses `rabbitmq.auth.username` (default
+  `pecan`) with a generated password from Secret `<release>-rabbitmq`, key
+  `password`. Settings moved from `rabbitmq.rabbitmq.*` to `rabbitmq.auth.*`.
+
+**This is not an in-place upgrade from 0.6.x data.** PostgreSQL 11 and RabbitMQ
+3.8 volumes cannot be attached to the new StatefulSets; use fresh volumes or a
+planned dump and restore.
 
 ## Rstudio
 
@@ -157,16 +183,10 @@ betydb:
     enabled: true
     hosts:
       - pecan.localhost
-  postgresql:
-    persistence:
-      storageClass: local-path
 
-rabbitmq:
-  rabbitmq:
-    username: guest
-    password: guest
-    setUlimitNofiles: false
-    ulimitNofiles: "1024"
+postgresql:
+  persistence:
+    storageClass: local-path
 ```
 
 

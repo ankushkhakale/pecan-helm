@@ -62,13 +62,15 @@ Cluster environment
 RabbitMQ URI environment
 */}}
 {{- define "pecan.env.rabbitmq" -}}
+{{- $context := .Subcharts.rabbitmq | default (dict "Values" .Values.rabbitmq "Chart" (dict "Name" "rabbitmq") "Release" .Release) -}}
+{{- $name := include "pecan.fullname" $context -}}
 - name: RABBITMQ_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: {{ .Release.Name }}-rabbitmq
-      key: rabbitmq-password
+      name: {{ tpl (.Values.rabbitmq.auth.existingSecret | default $name) $context }}
+      key: {{ .Values.rabbitmq.auth.existingPasswordKey | default "password" }}
 - name: RABBITMQ_URI
-  value: "amqp://{{ .Values.rabbitmq.rabbitmq.username }}:$(RABBITMQ_PASSWORD)@{{ .Release.Name }}-rabbitmq/%2F"
+  value: "amqp://{{ .Values.rabbitmq.auth.username }}:$(RABBITMQ_PASSWORD)@{{ $name }}:{{ .Values.rabbitmq.service.amqpPort | default 5672 }}/%2F"
 {{- end -}}
 
 {{/*

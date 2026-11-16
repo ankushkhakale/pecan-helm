@@ -1,0 +1,22 @@
+{{- if .Values.postgresql.enabled }}
+{{- $postgres := .Subcharts.postgresql }}
+{{- $name := printf "%s-postgresql" .Release.Name }}
+{{- if ne $name (include "postgres.fullname" $postgres) }}
+# BETY always connects to release-postgresql; keep that interface when the
+# dependency shortens its name or the operator overrides its fullname.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "pecan.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgresql
+      port: {{ .Values.betydb.postgresql.service.port }}
+      targetPort: postgresql
+  selector:
+    {{- include "postgres.selectorLabels" $postgres | nindent 4 }}
+{{- end }}
+{{- end }}
