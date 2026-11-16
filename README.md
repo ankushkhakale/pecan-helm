@@ -4,14 +4,21 @@ Climate change science has witnessed an explosion in the amount and types of dat
 
 [PEcAn](https://pecanproject.github.io/) is an open source datamanagement for long tail data.
 
-## TL;DR;
+## TL;DR
+
+From a checkout of this branch:
 
 ```bash
 $ helm repo add ncsa https://opensource.ncsa.illinois.edu/charts/
 $ helm repo add bitnami https://raw.githubusercontent.com/bitnami/charts/pre-2022/bitnami
-$ helm dependency build
-$ helm install pecan ncsa/pecan
+$ helm dependency build .
+$ helm lint . --strict
+$ helm template pecan .
 ```
+
+The published `ncsa/pecan` package does not contain this change. This branch
+retains the upstream RabbitMQ and PostgreSQL image tags, which are unavailable;
+a fresh install needs the separate image replacement work as well.
 
 ## Introduction
 
@@ -25,10 +32,10 @@ This chart bootstraps a [PEcAn](https://pecanproject.github.io/) deployment on a
 
 ## Installing the Chart
 
-To install the chart with the release name `my-release`:
+To install this chart from a checkout with working image replacements, using the release name `my-release`:
 
 ```bash
-$ helm install my-release ncsa/pecan
+$ helm install my-release .
 ```
 
 The command deploys PEcAn on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation. This will also install BetyDB as well as some model runners.
@@ -69,7 +76,7 @@ The following table lists the configurable parameters of the PEcAn chart and the
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
 ```bash
-$ helm install my-release ncsa/pecan --set clustername=ncsa
+$ helm install my-release . --set clustername=ncsa
 ```
 
 The above command sets the cluster name to `ncsa`.
@@ -77,7 +84,7 @@ The above command sets the cluster name to `ncsa`.
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
 ```bash
-$ helm install my-release ncsa/pecan --values values.yaml
+$ helm install my-release . --values values.yaml
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)
@@ -106,7 +113,7 @@ PEcAn uses disk storage to store the results of the workflow execution as well a
 1. Install the chart
 
 ```bash
-$ helm install my-release ncsa/pecan --set persistence.existingClaim=PVC_NAME
+$ helm install my-release . --set persistence.existingClaim=PVC_NAME
 ```
 
 ## Testing Locally
